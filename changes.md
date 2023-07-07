@@ -5,4 +5,6 @@ I made notes in Tools/scripts/build_options.py of what to disable; the file uses
     0 Enable
     1 Disable
 
-    
+Need to have:
+    I2C connection with the Raspberry pi for data transmit
+    Possible: connection to a separate app to enable editing to data and analyzing data
