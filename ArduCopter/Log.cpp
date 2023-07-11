@@ -20,6 +20,16 @@ struct PACKED log_Control_Tuning {
     float    terr_alt;
     int16_t  target_climb_rate;
     int16_t  climb_rate;
+    float    pedal_volt;
+    float    roll;
+    float    pitch;
+    float    yaw;
+    float    roll_rate;
+    float    pitch_rate;
+    float    yaw_rate;
+    float    thrust;
+    float    climb_rate;
+    
 };
 
 // Write a control tuning packet
@@ -47,6 +57,7 @@ void Copter::Log_Write_Control_Tuning()
 
     struct log_Control_Tuning pkt = {
         LOG_PACKET_HEADER_INIT(LOG_CONTROL_TUNING_MSG),
+
         time_us             : AP_HAL::micros64(),
         throttle_in         : attitude_control->get_throttle_in(),
         angle_boost         : attitude_control->angle_boost(),
@@ -59,7 +70,25 @@ void Copter::Log_Write_Control_Tuning()
         rangefinder_alt     : surface_tracking.get_dist_for_logging(),
         terr_alt            : terr_alt,
         target_climb_rate   : target_climb_rate_cms,
-        climb_rate          : int16_t(inertial_nav.get_velocity_z_up_cms()) // float -> int16_t
+        climb_rate          : int16_t(inertial_nav.get_velocity_z_up_cms()), // float -> int16_t
+        type                : (uint8_t)target_type,
+        /*
+        roll                : degrees(get roll method),
+        pitch               : degrees(get pitch method),
+        yaw                 : degrees(get yaw method),        // rad to deg
+        roll_rate           : degrees(get x angle velocity method),  // rad/s to deg/s
+        pitch_rate          : degrees(get y angle velocity method),  // rad/s to deg/s
+        yaw_rate            : degrees(get z angle velocity method),  // rad/s to deg/s
+        thrust              : thrust,
+        climb_rate          : climb_rate,
+        pedal_volt           : (get pedal voltage);
+        */
+        
+         // float -> int16_t
+
+        
+        
+        
     };
     logger.WriteBlock(&pkt, sizeof(pkt));
 }
@@ -300,7 +329,7 @@ void Copter::Log_Write_SysID_Setup(uint8_t systemID_axis, float waveform_magnitu
     logger.WriteBlock(&pkt_sids, sizeof(pkt_sids));
 #endif
 }
-
+/* 
 #if FRAME_CONFIG == HELI_FRAME
 struct PACKED log_Heli {
     LOG_PACKET_HEADER;
@@ -325,8 +354,10 @@ void Copter::Log_Write_Heli()
     logger.WriteBlock(&pkt_heli, sizeof(pkt_heli));
 }
 #endif
-
+*/
 // guided position target logging
+
+/*
 struct PACKED log_Guided_Position_Target {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -342,7 +373,9 @@ struct PACKED log_Guided_Position_Target {
     float accel_target_y;
     float accel_target_z;
 };
+*/
 
+/*
 // guided attitude target logging
 struct PACKED log_Guided_Attitude_Target {
     LOG_PACKET_HEADER;
@@ -356,12 +389,14 @@ struct PACKED log_Guided_Attitude_Target {
     float yaw_rate;
     float thrust;
     float climb_rate;
+    float pedal_volt;
 };
-
+*/
 // Write a Guided mode position target
 // pos_target is lat, lon, alt OR offset from ekf origin in cm
 // terrain should be 0 if pos_target.z is alt-above-ekf-origin, 1 if alt-above-terrain
 // vel_target is cm/s
+/*
 void Copter::Log_Write_Guided_Position_Target(ModeGuided::SubMode target_type, const Vector3f& pos_target, bool terrain_alt, const Vector3f& vel_target, const Vector3f& accel_target)
 {
     const log_Guided_Position_Target pkt {
@@ -381,13 +416,14 @@ void Copter::Log_Write_Guided_Position_Target(ModeGuided::SubMode target_type, c
     };
     logger.WriteBlock(&pkt, sizeof(pkt));
 }
-
+*/
 // Write a Guided mode attitude target
 // roll, pitch and yaw are in radians
 // ang_vel: angular velocity, [roll rate, pitch_rate, yaw_rate] in radians/sec
 // thrust is between 0 to 1
 // climb_rate is in (m/s)
-void Copter::Log_Write_Guided_Attitude_Target(ModeGuided::SubMode target_type, float roll, float pitch, float yaw, const Vector3f &ang_vel, float thrust, float climb_rate)
+/*
+void Copter::Log_Write_Guided_Attitude_Target(ModeGuided::SubMode target_type, float roll, float pitch, float yaw, const Vector3f &ang_vel, float thrust, float climb_rate, float pedal_voltage)
 {
     const log_Guided_Attitude_Target pkt {
         LOG_PACKET_HEADER_INIT(LOG_GUIDED_ATTITUDE_TARGET_MSG),
@@ -400,11 +436,13 @@ void Copter::Log_Write_Guided_Attitude_Target(ModeGuided::SubMode target_type, f
         pitch_rate      : degrees(ang_vel.y),  // rad/s to deg/s
         yaw_rate        : degrees(ang_vel.z),  // rad/s to deg/s
         thrust          : thrust,
-        climb_rate      : climb_rate
+        climb_rate      : climb_rate,
+        pedal_volt      : pedal_voltage
+
     };
     logger.WriteBlock(&pkt, sizeof(pkt));
 }
-
+*/
 // type and unit information can be found in
 // libraries/AP_Logger/Logstructure.h; search for "log_Units" for
 // units and "Format characters" for field type information
