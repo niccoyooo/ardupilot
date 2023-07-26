@@ -26,7 +26,7 @@ class CtrlPos_backend
 
 public:
     // constructor
-    CtrlPos_backend(AP_CtrlPos &_frontend);
+    CtrlPos_backend(AP_CtrlPos   &_frontend);
     virtual ~CtrlPos_backend(void);
 
     CLASS_NO_COPY(CtrlPos_backend);

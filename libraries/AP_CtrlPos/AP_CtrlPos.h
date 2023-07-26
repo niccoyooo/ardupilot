@@ -38,6 +38,7 @@
 #include <AP_Math/AP_Math.h>
 #include <GCS_MAVLink/GCS_MAVLink.h>
 #include "AP_CtrlPos_Calibrator.h"
+#include "AP_CtrlPos_PX4Flow.h"
 
 class CtrlPos_backend;
 
@@ -95,14 +96,24 @@ public:
     // get_height_override() - returns the user-specified height of sensor above ground
     float get_height_override() const { return 2.0f; }
 
+    // including our collected numbers in the log packets...
+    float getFirstNum() const {return _state.first_number; }
+    float getSecondNum() const {return _state.second_number; }
+    float getThirdNum() const {return _state.third_number; }
     struct CtrlPos_state {
         uint8_t  surface_quality;   // image quality (below TBD you can't trust the dx,dy values returned)
         Vector2f flowRate;          // optical flow angular rate in rad/sec measured about the X and Y body axis. A RH rotation about a sensor axis produces a positive rate.
         Vector2f bodyRate;          // body inertial angular rate in rad/sec measured about the X and Y body axis. A RH rotation about a sensor axis produces a positive rate.
+
+        // added this in
+        float first_number;
+        float second_number;
+        float third_number;
+    
     };
 
     // return a 3D vector defining the position offset of the sensors focal point in metres relative to the body frame origin
-    const Vector3f &get_pos_offset(void) const {
+    const Vector3f & get_pos_offset(void) const {
         return _pos_offset;
     }
 

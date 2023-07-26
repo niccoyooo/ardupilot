@@ -101,7 +101,7 @@ void AP_CtrlPos::init(uint32_t log_bit)
      _log_bit = log_bit;
     GCS_SEND_TEXT(MAV_SEVERITY_ALERT, "Initializing...");
     // force type to be PX4FLOW
-        backend = AP_CtrlPos_PX4Flow::detect(*this);
+    backend = AP_CtrlPos_PX4Flow::detect(*this);
 /*    
     // return immediately if not enabled or backend already created
     if ((_type == Type::NONE) || (backend != nullptr)) {
@@ -234,15 +234,18 @@ void AP_CtrlPos::Log_Write_CtrlPos()
         return;
     }
 
+   
 // need to keep this as optflow because that is what is defined in AP_Logger
     struct log_Optflow pkt = {
         LOG_PACKET_HEADER_INIT(LOG_OPTFLOW_MSG),
         time_us         : AP_HAL::micros64(),
         surface_quality : _state.surface_quality,
-        flow_x          : _state.flowRate.x,
-        flow_y          : _state.flowRate.y,
-        body_x          : _state.bodyRate.x,
-        body_y          : _state.bodyRate.y
+        
+        // edited qualities 
+        flow_x          : first_number,
+        flow_y          : second_number,
+        body_x          : third_number,
+        body_y          : 0,
     };
     logger->WriteBlock(&pkt, sizeof(pkt));
 }

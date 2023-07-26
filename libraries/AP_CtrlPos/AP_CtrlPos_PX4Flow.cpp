@@ -36,6 +36,10 @@ extern const AP_HAL::HAL& hal;
 #define PX4FLOW_BASE_I2C_ADDR   0x50
 #define PX4FLOW_INIT_RETRIES    100      // attempt to initialise the sensor up to 10 times at startup
 
+float first_number;
+float second_number;
+float third_number;
+
 
 // detect the device
 AP_CtrlPos_PX4Flow *AP_CtrlPos_PX4Flow::detect(AP_CtrlPos &_frontend)
@@ -96,12 +100,7 @@ bool AP_CtrlPos_PX4Flow::scan_buses(void)
             WITH_SEMAPHORE(tdev->get_semaphore());
             dev = std::move(tdev);
             success = true;
- /*           struct i2c_integral_frame frame;
-            success = tdev->read_registers(REG_INTEGRAL_FRAME, (uint8_t *)&frame, sizeof(frame));
-            if (success) {
-                gcs().send_text(MAV_SEVERITY_DEBUG, "Found Device");
-                break;
-            } */
+
         }
         retry_attempt++;
         if (!success) {
@@ -131,36 +130,79 @@ void AP_CtrlPos_PX4Flow::update(void)
 {
 }
 
+#define STATUS_SHIFT 30
+#define FIRST_SHIFT 4
+#define FIRST_MASK ((1 << 20) - 1)
+#define SECOND_SHIFT 8
+#define SECOND_MASK ((1 << 20) - 1)
+#define THIRD_SHIFT 12
+#define THIRD_MASK ((1 << 20) - 1)
+
 // timer to read sensor
 void AP_CtrlPos_PX4Flow::timer(void)
 {
-//    struct i2c_integral_frame frame;
-/*    if (!dev->read_registers(REG_INTEGRAL_FRAME, (uint8_t *)&frame, sizeof(frame))) {
-        return;
-    } */
-    uint8_t raw_bytes[4];
+
+    uint8_t raw_bytes[4]; 
     if (!dev->read((uint8_t *)&raw_bytes, sizeof(raw_bytes))) {
         return;
     }
 
-/*    struct AP_CtrlPos::CtrlPos_state state {};
+    uint32_t data = (raw_bytes[0] << 24) |
+                    (raw_bytes[1] << 16) |
+                    (raw_bytes[2] << 8)  |
+                    raw_bytes[3];
+   
+    uint32_t first_raw = (data >> FIRST_SHIFT) & FIRST_MASK;
+    uint32_t second_raw = (data >>  SECOND_SHIFT) & SECOND_MASK;
+    uint32_t third_raw = (data >> THIRD_SHIFT) & THIRD_MASK;
 
-    if (frame.integration_timespan > 0) {
-        const Vector2f flowScaler = _flowScaler();
-        float flowScaleFactorX = 1.0f + 0.001f * flowScaler.x;
-        float flowScaleFactorY = 1.0f + 0.001f * flowScaler.y;
-        float integralToRate = 1.0e6 / frame.integration_timespan;
-        
-        state.surface_quality = frame.qual;
-        state.flowRate = Vector2f(frame.pixel_flow_x_integral * flowScaleFactorX,
-                                  frame.pixel_flow_y_integral * flowScaleFactorY) * 1.0e-4 * integralToRate;
-        state.bodyRate = Vector2f(frame.gyro_x_rate_integral, frame.gyro_y_rate_integral) * 1.0e-4 * integralToRate;
-        
-        _applyYaw(state.flowRate);
-        _applyYaw(state.bodyRate);
+    first_number = first_raw * 1.0f;
+    second_number = second_raw * 1.0f;
+    third_number = third_raw * 1.0f;
+
+    if (first_raw > 0) {
+        gcs().send_text(MAV_SEVERITY_DEBUG, "FIRST NUMBER READ");
     }
 
-    _update_frontend(state); */
+    if (second_raw > 0) {
+        gcs().send_text(MAV_SEVERITY_DEBUG, "SECOND NUMBER READ");
+    }
+
+    if (third_raw > 0) {
+        gcs().send_text(MAV_SEVERITY_DEBUG, "THIRD NUMBER READ");
+    }
+
 }
+
+float AP_CtrlPos_PX4Flow::getFirstNum()
+{
+    return first_number;
+}
+float AP_CtrlPos_PX4Flow::getSecondNum()
+{
+    return second_number;
+}
+float AP_CtrlPos_PX4Flow::getThirdNum()
+{
+    return third_number;
+}
+
+
+
+
+
+
+
+
+    
+
+
+
+    
+
+
+
+
+
 
 #endif  // AP_OPTICALFLOW_PX4FLOW_ENABLED
